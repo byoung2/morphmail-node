@@ -1,0 +1,25 @@
+{
+  "name": "morphmail-node",
+  "version": "0.0.1",
+  "description": "Distributed P2P email. Instead of a central server, Morphmail uses nodes like this one to route messages.",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/byoung2/morphmail-node.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/byoung2/morphmail-node/issues"
+  },
+  "homepage": "https://github.com/byoung2/morphmail-node#readme",
+  "dependencies": {
+    "ipaddr.js": "^2.0.1"
+  },
+  "devDependencies": {
+    "mocha": "^9.2.0"
+  }
+}
