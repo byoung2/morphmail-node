@@ -7,13 +7,15 @@ describe('DAG', function() {
         const testWalletFrom = wallet.instance();
         const testWalletTo = wallet.instance();
         const testGraph = graph.instance({
-            txId: 'genesis',
-            parent: null,
-            to: testWalletFrom.getAddress(),
-            from: null,
-            amount: 10000,
-            timestamp: '2022-02-07T03:49:01+00:00',
-            hash: 'hash'
+            genesis: {
+                txId: 'genesis',
+                parent: null,
+                to: testWalletFrom.getAddress(),
+                from: null,
+                amount: 10000,
+                timestamp: '2022-02-07T03:49:01+00:00',
+                hash: 'hash'
+            }
         });
         const transaction = {
             to: testWalletTo.getAddress(),
