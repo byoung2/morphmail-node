@@ -4,7 +4,7 @@
   "description": "Distributed P2P email. Instead of a central server, Morphmail uses nodes like this one to route messages.",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha --recursive"
+    "test": "mocha --recursive"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
     "bitcoinjs-message": "^2.2.0",
     "crypto-js": "^4.1.1",
     "ecpair": "^2.0.1",
+    "inquirer": "^8.2.0",
     "ipaddr.js": "^2.0.1",
     "lodash": "^4.17.21",
     "node-json-db": "^1.4.1",
