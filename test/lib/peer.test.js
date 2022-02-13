@@ -78,4 +78,49 @@ describe('Peer', function() {
             assert.equal(sortedIpAddresses[0], '2bab:8f74:59e3:a77e:2a0d:da34:04bd:fab8');
         });
     });
+
+    describe('node graph', function() {
+        const testWallet = '1HUqrQ9gkyDmkxnJ1TwSi1AbTncAfGGthM';
+
+        const testNodeGraph = {
+            '1EJ6SkkQkJebkMjaRXsnPGvbamVQUYa9UB': {
+                address: '1EJ6SkkQkJebkMjaRXsnPGvbamVQUYa9UB',
+                parents: [],
+                type: 'node',
+                ipAddress: '36.146.80.237',
+            },
+            '154dqG1Rt4yGqxqkAtuZAYWozfUNkb52Mp': {
+                address: '154dqG1Rt4yGqxqkAtuZAYWozfUNkb52Mp',
+                parents: [],
+                type: 'node',
+                ipAddress: '186.143.177.136',
+            },
+            '1JaDkegoNM52Ckd68hiqRM8hzbV8UTkjdR': {
+                address: '1JaDkegoNM52Ckd68hiqRM8hzbV8UTkjdR',
+                parents: [],
+                type: 'node',
+                ipAddress: '7574:9791:27de:bd69:fe58:2e42:1d2a:26aa',
+            },
+            '1P6P52vQxPFnTiWC6jETWPHsnbrQAeca5P': {
+                address: '1P6P52vQxPFnTiWC6jETWPHsnbrQAeca5P',
+                parents: ['1JaDkegoNM52Ckd68hiqRM8hzbV8UTkjdR'],
+                type: 'node',
+                ipAddress: 'bd8f:2757:4e5a:2458:b89f:992d:616f:42e8',
+            },
+            '1HUqrQ9gkyDmkxnJ1TwSi1AbTncAfGGthM': {
+                address: '1HUqrQ9gkyDmkxnJ1TwSi1AbTncAfGGthM',
+                parents: [
+                    '1EJ6SkkQkJebkMjaRXsnPGvbamVQUYa9UB', 
+                    '154dqG1Rt4yGqxqkAtuZAYWozfUNkb52Mp',
+                    '1JaDkegoNM52Ckd68hiqRM8hzbV8UTkjdR',
+                ],
+                type: 'client',
+            },
+        };
+        it('should return node ip addresses for a client address that exists in the graph', function() {
+            const ipAddresses = peer.getNodeIpAddresses(testWallet, testNodeGraph);
+            assert.equal(ipAddresses.length, 3);
+            assert.equal(ipAddresses[0], '7574:9791:27de:bd69:fe58:2e42:1d2a:26aa');
+        });
+    });
 });
