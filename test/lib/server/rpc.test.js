@@ -10,7 +10,7 @@ describe('RPC', function() {
         });
         it('should call allowed method', async function() {
             const testWallet = '1HUqrQ9gkyDmkxnJ1TwSi1AbTncAfGGthM';
-            const res = await rpc.call('registerPeer', [testWallet, 'client']);
+            const res = await rpc.call('registerPeer', [{address: testWallet, type: 'client'}]);
             const storedClient = StorageManager.getClient(testWallet);
             assert.equal(res, true);
             assert.equal(storedClient.address, testWallet);
