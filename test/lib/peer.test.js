@@ -1,5 +1,4 @@
 const peer = require('../../lib/peer');
-const wallet = require('../../lib/cryptocurrency/wallet');
 const assert = require('assert');
 
 describe('Peer', function() {

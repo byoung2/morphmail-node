@@ -8,10 +8,10 @@ describe('RPC', function() {
             serverId: '1P6P52vQxPFnTiWC6jETWPHsnbrQAeca5P',
             type: 'full',
         });
+        const testWallet = '1HUqrQ9gkyDmkxnJ1TwSi1AbTncAfGGthM';
         it('should call allowed method', async function() {
-            const testWallet = '1HUqrQ9gkyDmkxnJ1TwSi1AbTncAfGGthM';
-            const res = await rpc.call('registerPeer', [{address: testWallet, type: 'client'}]);
-            const storedClient = StorageManager.getClient(testWallet);
+            const res = await rpc.call('registerPeer', [{address: testWallet, type: 'client', parents:[]}]);
+            const storedClient = StorageManager.getPeer(testWallet);
             assert.equal(res, true);
             assert.equal(storedClient.address, testWallet);
         });
@@ -24,5 +24,8 @@ describe('RPC', function() {
         it('should throw an error on invalid method', async function() {
             assert.throws(() => rpc.call('fakeMethod', []));
         });
+        after(function() {
+            rpc.call('unRegisterPeer', [{address: testWallet}]);
+        })
     });
 });

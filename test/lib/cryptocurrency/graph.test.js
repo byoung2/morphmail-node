@@ -14,7 +14,8 @@ describe('DAG', function() {
                 from: null,
                 amount: 10000,
                 timestamp: '2022-02-07T03:49:01+00:00',
-                hash: 'hash'
+                hash: 'hash',
+                data: {},
             }
         });
         const transaction = {
@@ -38,9 +39,37 @@ describe('DAG', function() {
                 to: testWalletTo.getAddress(),
                 from: testWalletFrom.getAddress(),
                 amount: 100,
+                data: {},
             };
             transaction.signature = 'fake signature';
             assert.throws(() => testGraph.addVertex('genesis', transaction));
+        });
+
+        it('should throw error on insufficient funds', function() {
+            const transaction = {
+                to: testWalletTo.getAddress(),
+                from: testWalletFrom.getAddress(),
+                amount: 10000,
+                data: {},
+            };
+            transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
+            assert.throws(() => testGraph.addVertex('genesis', transaction));
+        });
+
+        it('should find an address for an alias', function() {
+            const transaction = {
+                to: testWalletTo.getAddress(),
+                from: testWalletFrom.getAddress(),
+                amount: 1,
+                data: {
+                    alias: 'username'
+                },
+            };
+            transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
+            const lastTxId = testGraph.getLatestTxID();
+            testGraph.addVertex(lastTxId, transaction);
+            const vertex = testGraph.getAddressForAlias('username');
+            assert.equal(vertex, testWalletFrom.getAddress());
         });
 
         it('should throw error on invalid branch hash', function() {
@@ -50,6 +79,7 @@ describe('DAG', function() {
                     to: testWalletTo.getAddress(),
                     from: testWalletFrom.getAddress(),
                     amount: 100,
+                    data: {},
                 };
                 transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
                 const vertex = testGraph.addVertex(finalTxId, transaction);
@@ -59,16 +89,6 @@ describe('DAG', function() {
                 testGraph.graph[txId].amount = 99;
             });
             assert.throws(() => testGraph.verifyChain(finalTxId));
-        });
-
-        it('should throw error on insufficient funds', function() {
-            const transaction = {
-                to: testWalletTo.getAddress(),
-                from: testWalletFrom.getAddress(),
-                amount: 10000,
-            };
-            transaction.signature = 'fake signature';
-            assert.throws(() => testGraph.addVertex('genesis', transaction));
         });
     });
 });
