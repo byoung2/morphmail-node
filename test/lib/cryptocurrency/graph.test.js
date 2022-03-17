@@ -85,6 +85,11 @@ describe('DAG', function() {
             assert.equal(vertex.parent, 'genesis');
         });
 
+        it('should return transactions after timestamp', function() {
+            const latest = testGraph.getTransactionsAfter('2022-02-07T03:49:01+00:00');
+            assert.equal(latest.length, 1);
+        });
+
         it('should throw error on nonexistant parent vertex', function() {
             assert.throws(() => testGraph.addVertex('def', 'fake'));
         });
