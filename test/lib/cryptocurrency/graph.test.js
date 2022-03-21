@@ -90,6 +90,27 @@ describe('DAG', function() {
             assert.equal(latest.length, 1);
         });
 
+        it('should return child transactions of vertex', function() {
+            let finalTxId = 'genesis';
+            let parent;
+            for(let i=0; i<10; i++) {
+                if(i === 5) {
+                    parent = finalTxId;
+                }
+                const transaction = {
+                    to: testWalletTo.getAddress(),
+                    from: testWalletFrom.getAddress(),
+                    amount: 100,
+                    data: {},
+                };
+                transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
+                const vertex = testGraph.addVertex(finalTxId, transaction);
+                finalTxId = vertex.txId;
+            }
+            const tree = testGraph.getTransactionTree(parent, 3);
+            assert.equal(Object.keys(tree).length, 3);
+        });
+
         it('should throw error on nonexistant parent vertex', function() {
             assert.throws(() => testGraph.addVertex('def', 'fake'));
         });

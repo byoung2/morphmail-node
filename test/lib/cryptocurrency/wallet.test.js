@@ -32,5 +32,12 @@ describe('Cryptocurrency', function() {
             const verify = testWallet.verifyMessage(message, testWallet.getAddress(), signature);
             verify.should.equal(true);
         });
+
+        it('should verify a signature generated in a browser', function() {
+            const message = 'hello';
+            const signature = 'IE0O9+UkbOsWPAvlfBCMqp/u5W4E3LaPsNjeFMlj3+wUpg7ZoycSqQ+/7BPTVFQsfPSvshqI1uOje6pXVxGFUX8=';
+            const verify = testWallet.verifyMessage(message, '1PBELaJoX5ukxE1C7QWYdjrhNHrXnSRVhX', signature);
+            verify.should.equal(true);
+        });
     });
 });
