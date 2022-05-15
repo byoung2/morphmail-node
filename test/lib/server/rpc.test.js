@@ -119,7 +119,7 @@ describe('RPC', function() {
             };
             transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
             const lastTxId = testGraph.getLatestTxID();
-            testGraph.addVertex(lastTxId, transaction);
+            await testGraph.addVertex(lastTxId, transaction);
 
             const res = await rpc.call('getPGPKey', ['@username']);
             assert.equal(res, publicKeyArmored);

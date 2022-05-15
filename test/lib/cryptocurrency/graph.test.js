@@ -58,7 +58,7 @@ uRXS1r7c2sluSSRMtxLxHnZUZDWB8oQWLJEXltL1wJUfeXCdpzUVSSmOqOM0
 -----END PGP PUBLIC KEY BLOCK-----`;
 
 describe('DAG', function() {
-    describe('graph', function() {
+    describe('graph', async function() {
         const testWalletFrom = wallet.instance();
         const testWalletTo = wallet.instance();
         const testGraph = graph.instance({
@@ -68,6 +68,7 @@ describe('DAG', function() {
                 to: testWalletFrom.getAddress(),
                 from: null,
                 amount: 10000,
+                fee: 0,
                 timestamp: '2022-02-07T03:49:01+00:00',
                 hash: 'hash',
                 data: {},
@@ -77,9 +78,10 @@ describe('DAG', function() {
             to: testWalletTo.getAddress(),
             from: testWalletFrom.getAddress(),
             amount: 100,
+            fee: 0.00001,
         };
         transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
-        const vertex = testGraph.addVertex('genesis', transaction);
+        const vertex = await testGraph.addVertex('genesis', transaction);
 
         it('should return vertex in graph', function() {
             assert.equal(vertex.parent, 'genesis');
@@ -90,7 +92,7 @@ describe('DAG', function() {
             assert.equal(latest.length, 1);
         });
 
-        it('should return child transactions of vertex', function() {
+        it('should return child transactions of vertex', async function() {
             let finalTxId = 'genesis';
             let parent;
             for(let i=0; i<10; i++) {
@@ -101,91 +103,121 @@ describe('DAG', function() {
                     to: testWalletTo.getAddress(),
                     from: testWalletFrom.getAddress(),
                     amount: 100,
+                    fee: 0.00001,
                     data: {},
                 };
                 transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
-                const vertex = testGraph.addVertex(finalTxId, transaction);
+                const vertex = await testGraph.addVertex(finalTxId, transaction);
                 finalTxId = vertex.txId;
             }
             const tree = testGraph.getTransactionTree(parent, 3);
             assert.equal(Object.keys(tree).length, 3);
         });
 
-        it('should throw error on nonexistant parent vertex', function() {
-            assert.throws(() => testGraph.addVertex('def', 'fake'));
+        it('should throw error on nonexistant parent vertex', async function() {
+            let error;
+            try {
+                await testGraph.addVertex('def', 'fake');
+            } catch(e) {
+                error = e;
+            }
+            assert(error);
         });
 
-        it('should throw error on invalid signature', function() {
+        it('should throw error on invalid signature', async function() {
+            let error;
             const transaction = {
                 to: testWalletTo.getAddress(),
                 from: testWalletFrom.getAddress(),
                 amount: 100,
+                fee: 0.00001,
                 data: {},
             };
             transaction.signature = 'fake signature';
-            assert.throws(() => testGraph.addVertex('genesis', transaction));
+            try {
+                await testGraph.addVertex('genesis', transaction);
+            } catch(e) {
+                error = e;
+            }
+            assert(error);
         });
 
-        it('should throw error on insufficient funds', function() {
+        it('should throw error on insufficient funds', async function() {
+            let error;
             const transaction = {
                 to: testWalletTo.getAddress(),
                 from: testWalletFrom.getAddress(),
                 amount: 10000,
+                fee: 0.00001,
                 data: {},
             };
             transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
-            assert.throws(() => testGraph.addVertex('genesis', transaction));
+            try {
+                await testGraph.addVertex('genesis', transaction);
+            } catch(e) {
+                error = e;
+            }
+            assert(error);
         });
 
-        it('should find an address for an alias', function() {
+        it('should find an address for an alias', async function() {
             const transaction = {
                 to: testWalletTo.getAddress(),
                 from: testWalletFrom.getAddress(),
                 amount: 1,
+                fee: 0.00001,
                 data: {
                     alias: 'username'
                 },
             };
             transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
             const lastTxId = testGraph.getLatestTxID();
-            testGraph.addVertex(lastTxId, transaction);
+            await testGraph.addVertex(lastTxId, transaction);
             const address = testGraph.getAddressForAlias('username');
             assert.equal(address, testWalletFrom.getAddress());
         });
 
-        it('should find a PGP key for an address', function() {
+        it('should find a PGP key for an address', async function() {
             const transaction = {
                 to: testWalletTo.getAddress(),
                 from: testWalletFrom.getAddress(),
                 amount: 1,
+                fee: 0.00001,
                 data: {
                     pgpPublicKey: publicKeyArmored,
                 },
             };
             transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
             const lastTxId = testGraph.getLatestTxID();
-            testGraph.addVertex(lastTxId, transaction);
+            await testGraph.addVertex(lastTxId, transaction);
             const key = testGraph.getPGPKeyForAddress(testWalletFrom.getAddress());
             assert.equal(key, publicKeyArmored);
         });
 
-        it('should throw error on invalid branch hash', function() {
+        it('should throw error on invalid branch hash', async function() {
             let finalTxId = 'genesis';
+            let error;
             for(let i=0; i<10; i++) {
                 const transaction = {
                     to: testWalletTo.getAddress(),
                     from: testWalletFrom.getAddress(),
                     amount: 100,
+                    fee: 0.00001,
                     data: {},
                 };
                 transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
-                const vertex = testGraph.addVertex(finalTxId, transaction);
+                const vertex = await testGraph.addVertex(finalTxId, transaction);
                 finalTxId = vertex.txId;
             }
             Object.keys(testGraph.graph).forEach(txId => {
                 testGraph.graph[txId].amount = 99;
             });
-            assert.throws(() => testGraph.verifyChain(finalTxId));
+            try {
+                await testGraph.verifyChain(finalTxId);
+            } catch(e) {
+                error = e;
+            }
+            assert(error);
         });
     });
 });

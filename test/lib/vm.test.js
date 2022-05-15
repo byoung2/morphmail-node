@@ -11,6 +11,10 @@ describe('VM', function() {
                         this.wallet = wallet;
                     }
 
+                    getSchedule() {
+                        return 'immediate';
+                    }
+
                     getAddressByAlias(alias) {
                         const lookup = {
                             'morpheus': '1B4JMr5LaCUrfMeRZSChNmnTiQpkQeoDRm'
@@ -33,6 +37,10 @@ describe('VM', function() {
                         this.wallet = wallet;
                     }
 
+                    getSchedule() {
+                        return 'immediate';
+                    }
+
                     getAddressByAlias(alias) {
                         const lookup = {
                             'morpheus': '1B4JMr5LaCUrfMeRZSChNmnTiQpkQeoDRm'
@@ -45,6 +53,58 @@ describe('VM', function() {
             const action = ['fakeMethod', ['morpheus']];
             const vm = VirtualMachine.instance(code, testWallet.getAddress(), action);
             assert.throws(() => vm.run());
+        });
+
+        it('should return default schedule', function() {
+            const code = `
+                class Contract {
+                    constructor(wallet) {
+                        this.wallet = wallet;
+                    }
+
+                    getSchedule() {
+                        return 'immediate';
+                    }
+
+                    getAddressByAlias(alias) {
+                        const lookup = {
+                            'morpheus': '1B4JMr5LaCUrfMeRZSChNmnTiQpkQeoDRm'
+                        };
+                        return lookup[alias];
+                    }
+                }
+            `;
+            const testWallet = wallet.instance();
+            const action = ['getSchedule', []];
+            const vm = VirtualMachine.instance(code, testWallet.getAddress(), action);
+            const schedule = vm.run();
+            assert.equal(schedule, 'immediate');
+        });
+
+        it('should return hourly schedule', function() {
+            const code = `
+                class Contract {
+                    constructor(wallet) {
+                        this.wallet = wallet;
+                    }
+
+                    getSchedule() {
+                        return 'hourly';
+                    }
+
+                    getAddressByAlias(alias) {
+                        const lookup = {
+                            'morpheus': '1B4JMr5LaCUrfMeRZSChNmnTiQpkQeoDRm'
+                        };
+                        return lookup[alias];
+                    }
+                }
+            `;
+            const testWallet = wallet.instance();
+            const action = ['getSchedule', []];
+            const vm = VirtualMachine.instance(code, testWallet.getAddress(), action);
+            const schedule = vm.run();
+            assert.equal(schedule, 'hourly');
         });
     });
 });
