@@ -60,7 +60,7 @@ uRXS1r7c2sluSSRMtxLxHnZUZDWB8oQWLJEXltL1wJUfeXCdpzUVSSmOqOM0
 -----END PGP PUBLIC KEY BLOCK-----`;
 
 describe('RPC', function() {
-    describe('methods', function() {
+    describe('methods', async function() {
         const testWalletFrom = wallet.instance();
         const testWalletTo = wallet.instance();
         const testGraph = graph.instance({
@@ -84,7 +84,7 @@ describe('RPC', function() {
             },
         };
         transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
-        testGraph.addVertex('genesis', transaction);
+        await testGraph.addVertex('genesis', transaction);
         const rpc = RPC.instance({
             serverId: '1P6P52vQxPFnTiWC6jETWPHsnbrQAeca5P',
             type: 'full',

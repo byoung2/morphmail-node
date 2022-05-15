@@ -8,7 +8,7 @@ const chai = require('chai');
 chai.should();
 
 describe('Consensus mechanism', function() {
-    describe('consistent', function() {
+    describe('consistent', async function() {
         const testWalletFrom = wallet.instance();
         const testWalletTo = wallet.instance();
         const testGraph = graph.instance({
@@ -32,7 +32,7 @@ describe('Consensus mechanism', function() {
                 data: {},
             };
             transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
-            const vertex = testGraph.addVertex(finalTxId, transaction);
+            const vertex = await testGraph.addVertex(finalTxId, transaction);
             finalTxId = vertex.txId;
         }
 
