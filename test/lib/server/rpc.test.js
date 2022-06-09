@@ -3,6 +3,7 @@ const StorageManager = require('../../../lib/storage');
 const graph = require('../../../lib/cryptocurrency/graph');
 const wallet = require('../../../lib/cryptocurrency/wallet');
 const assert = require('assert');
+const fs = require('fs');
 
 const publicKeyArmored = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 
@@ -63,6 +64,11 @@ describe('RPC', function() {
     describe('methods', async function() {
         const testWalletFrom = wallet.instance();
         const testWalletTo = wallet.instance();
+        try {
+            fs.unlinkSync(`db/transactions-qa.db`);
+        } catch(e) {
+
+        }
         const testGraph = graph.instance({
             genesis: {
                 txId: 'genesis',
@@ -74,7 +80,7 @@ describe('RPC', function() {
                 hash: 'hash',
                 data: {},
             }
-        });
+        }, 'qa');
         const transaction = {
             to: testWalletTo.getAddress(),
             from: testWalletFrom.getAddress(),

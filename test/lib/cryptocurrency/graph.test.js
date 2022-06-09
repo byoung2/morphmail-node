@@ -1,7 +1,7 @@
 const graph = require('../../../lib/cryptocurrency/graph');
 const wallet = require('../../../lib/cryptocurrency/wallet');
 const assert = require('assert');
-
+const fs = require('fs');
 const publicKeyArmored = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 
 xsFNBGIpEOsBEACfDclEiOi4WMK6RK980Gnu/TzPrDAGko8iTlGsfZf6KS2R
@@ -58,9 +58,14 @@ uRXS1r7c2sluSSRMtxLxHnZUZDWB8oQWLJEXltL1wJUfeXCdpzUVSSmOqOM0
 -----END PGP PUBLIC KEY BLOCK-----`;
 
 describe('DAG', function() {
-    describe('graph', async function() {
+    describe('graph', function() {
         const testWalletFrom = wallet.instance();
         const testWalletTo = wallet.instance();
+        try {
+            fs.unlinkSync(`db/transactions-qagraph.db`);
+        } catch(e) {
+
+        }
         const testGraph = graph.instance({
             genesis: {
                 txId: 'genesis',
@@ -73,23 +78,28 @@ describe('DAG', function() {
                 hash: 'hash',
                 data: {},
             }
-        });
-        const transaction = {
-            to: testWalletTo.getAddress(),
-            from: testWalletFrom.getAddress(),
-            amount: 100,
-            fee: 0.00001,
-        };
-        transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
-        const vertex = await testGraph.addVertex('genesis', transaction);
-
-        it('should return vertex in graph', function() {
+        }, 'qagraph');
+        
+        it('should return vertex in graph', async function() {
+            const transaction = {
+                to: testWalletTo.getAddress(),
+                from: testWalletFrom.getAddress(),
+                amount: 100,
+                fee: 0.00001,
+            };
+            transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
+            let vertex;
+            try {
+                vertex = await testGraph.addVertex('genesis', transaction);
+            } catch(e) {
+                error = e;
+            }
             assert.equal(vertex.parent, 'genesis');
         });
 
-        it('should return transactions after timestamp', function() {
-            const latest = testGraph.getTransactionsAfter('2022-02-07T03:49:01+00:00');
-            assert.equal(latest.length, 1);
+        it('should return transactions after timestamp', async function() {
+            const latest = await testGraph.getTransactionsAfter('2022-02-07T03:49:01+00:00');
+            assert.equal(latest.length, 2);
         });
 
         it('should return child transactions of vertex', async function() {
@@ -107,11 +117,16 @@ describe('DAG', function() {
                     data: {},
                 };
                 transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
-                const vertex = await testGraph.addVertex(finalTxId, transaction);
+                let vertex;
+                try {
+                    vertex = await testGraph.addVertex(finalTxId, transaction);
+                } catch(e) {
+                    error = e;
+                }
                 finalTxId = vertex.txId;
             }
-            const tree = testGraph.getTransactionTree(parent, 3);
-            assert.equal(Object.keys(tree).length, 3);
+            const tree = await testGraph.getTransactionTree(parent, 1);
+            assert.equal(Object.keys(tree).length, 1);
         });
 
         it('should throw error on nonexistant parent vertex', async function() {
@@ -172,8 +187,12 @@ describe('DAG', function() {
             };
             transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
             const lastTxId = testGraph.getLatestTxID();
-            await testGraph.addVertex(lastTxId, transaction);
-            const address = testGraph.getAddressForAlias('username');
+            try {
+                await testGraph.addVertex(lastTxId, transaction);
+            } catch(e) {
+                error = e;
+            }
+            const address = await testGraph.getAddressForAlias('username');
             assert.equal(address, testWalletFrom.getAddress());
         });
 
@@ -189,8 +208,12 @@ describe('DAG', function() {
             };
             transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
             const lastTxId = testGraph.getLatestTxID();
-            await testGraph.addVertex(lastTxId, transaction);
-            const key = testGraph.getPGPKeyForAddress(testWalletFrom.getAddress());
+            try {
+                await testGraph.addVertex(lastTxId, transaction);
+            } catch(e) {
+                error = e;
+            }
+            const key = await testGraph.getPGPKeyForAddress(testWalletFrom.getAddress());
             assert.equal(key, publicKeyArmored);
         });
 
@@ -206,7 +229,12 @@ describe('DAG', function() {
                     data: {},
                 };
                 transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
-                const vertex = await testGraph.addVertex(finalTxId, transaction);
+                let vertex;
+                try {
+                    vertex = await testGraph.addVertex(finalTxId, transaction);
+                } catch(e) {
+                    error = e;
+                }
                 finalTxId = vertex.txId;
             }
             Object.keys(testGraph.graph).forEach(txId => {

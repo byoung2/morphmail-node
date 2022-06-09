@@ -6,11 +6,17 @@ const bs58 = require('bs58');
 const SHA256 = require('crypto-js/sha256');
 const chai = require('chai');
 chai.should();
+const fs = require('fs');
 
 describe('Consensus mechanism', function() {
     describe('consistent', async function() {
         const testWalletFrom = wallet.instance();
         const testWalletTo = wallet.instance();
+        try {
+            fs.unlinkSync(`db/transactions-qa.db`);
+        } catch(e) {
+
+        }
         const testGraph = graph.instance({
             genesis: {
                 txId: 'genesis',
@@ -22,7 +28,7 @@ describe('Consensus mechanism', function() {
                 hash: 'hash',
                 data: {},
             }
-        });
+        }, 'qa');
         let finalTxId = 'genesis';
         for(let i=0; i<2; i++) {
             const transaction = {
