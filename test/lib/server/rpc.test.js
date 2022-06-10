@@ -59,9 +59,8 @@ uRXS1r7c2sluSSRMtxLxHnZUZDWB8oQWLJEXltL1wJUfeXCdpzUVSSmOqOM0
 0Ni3qfIu/w2D/PD0OleSIPzmKsFRXLsZJroikDWLCmetjU9NjJ4=
 =k1FN
 -----END PGP PUBLIC KEY BLOCK-----`;
-
 describe('RPC', function() {
-    describe('methods', async function() {
+    describe('methods', function() {
         const testWalletFrom = wallet.instance();
         const testWalletTo = wallet.instance();
         try {
@@ -81,16 +80,7 @@ describe('RPC', function() {
                 data: {},
             }
         }, 'qa');
-        const transaction = {
-            to: testWalletTo.getAddress(),
-            from: testWalletFrom.getAddress(),
-            amount: 100,
-            data: {
-                alias: '@username'
-            },
-        };
-        transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
-        await testGraph.addVertex('genesis', transaction);
+        
         const rpc = RPC.instance({
             serverId: '1P6P52vQxPFnTiWC6jETWPHsnbrQAeca5P',
             type: 'full',
@@ -110,6 +100,17 @@ describe('RPC', function() {
         });
 
         it('should find an alias in the graph', async function() {
+            const transaction = {
+                to: testWalletTo.getAddress(),
+                from: testWalletFrom.getAddress(),
+                amount: 100,
+                data: {
+                    alias: '@username',
+                    pgpPublicKey: publicKeyArmored,
+                },
+            };
+            transaction.signature = testWalletFrom.signMessage(JSON.stringify(transaction));
+            await testGraph.addVertex('genesis', transaction);
             const res = await rpc.call('getAddressForAlias', ['@username']);
             assert.equal(res, testWalletFrom.getAddress());
         });
@@ -120,6 +121,7 @@ describe('RPC', function() {
                 from: testWalletFrom.getAddress(),
                 amount: 1,
                 data: {
+                    alias: '@username',
                     pgpPublicKey: publicKeyArmored,
                 },
             };
